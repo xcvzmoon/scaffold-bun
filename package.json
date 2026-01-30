@@ -1,0 +1,25 @@
+{
+  "name": "scaffold-bun",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "format": "oxfmt && oxfmt --check",
+    "lint": "oxlint --type-aware",
+    "dev": "bun --watch ./src/index.ts",
+    "build": "bunx --bun tsdown",
+    "start": "bun ./dist/index.mjs",
+    "changelog:bump": "bunx changelogen@latest --bump",
+    "changelog:release": "bunx changelogen@latest --release"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "oxfmt": "^0.27.0",
+    "oxlint": "^1.42.0",
+    "oxlint-tsgolint": "^0.11.4",
+    "tsdown": "^0.20.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "packageManager": "bun@1.3.8"
+}
