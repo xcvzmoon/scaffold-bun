@@ -8,6 +8,8 @@
     "dev": "bun --watch ./src/index.ts",
     "build": "bunx --bun tsdown",
     "start": "bun ./dist/index.mjs",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
     "changelog:bump": "bunx changelogen@latest --bump",
     "changelog:release": "bunx changelogen@latest --release"
   },
@@ -16,7 +18,8 @@
     "oxfmt": "^0.27.0",
     "oxlint": "^1.43.0",
     "oxlint-tsgolint": "^0.11.5",
-    "tsdown": "^0.20.3"
+    "tsdown": "^0.20.3",
+    "vitest": "^4.0.18"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"
