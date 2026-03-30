@@ -1,5 +1,6 @@
 {
   "name": "scaffold-bun",
+  "description": "My opinionated bun kickstarter",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
