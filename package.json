@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "format": "oxfmt && oxfmt --check",
+    "fmt": "oxfmt && oxfmt --check",
     "lint": "oxlint --type-aware",
     "dev": "bun --watch ./src/index.ts",
     "build": "bunx --bun tsdown",
