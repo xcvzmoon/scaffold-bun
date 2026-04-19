@@ -1,6 +1,6 @@
 {
-  "name": "scaffold-bun",
-  "description": "My opinionated bun kickstarter",
+  "name": "@xcvzmoon/kickstart-bun",
+  "description": "My bun starter template",
   "type": "module",
   "version": "0.0.0",
   "scripts": {
