@@ -2,32 +2,34 @@
 
 ## Purpose
 
-- This repository is a minimal Bun + TypeScript scaffold.
 - Use this file as the primary repository-specific instruction set for coding agents.
-- The repo currently has no `.cursor/rules/`, no `.cursorrules`, and no `.github/copilot-instructions.md`.
-- If any of those files are added later, merge their guidance with this document rather than contradicting it.
+- Keep it aligned with the real repository state. If other agent rule files are added later, merge guidance instead of creating conflicts.
 
 ## Project Snapshot
 
-- Package manager: `bun` (`packageManager` is `bun@1.3.11`).
-- Runtime/module system: ESM (`"type": "module"`).
-- Language: TypeScript with strict compiler settings.
-- Formatter/linter: `oxfmt` and `oxlint`.
+- Package manager: `bun` (`packageManager` is `bun@1.3.12`).
+- Runtime/module system: Bun + ESM (`"type": "module"`).
+- Language: TypeScript with strict mode enabled.
+- Formatter: `oxfmt`.
+- Linter: `oxlint` with type-aware checking.
 - Test runner: `vitest`.
-- Bundler/build tool: `tsdown`.
-- Source layout is intentionally small and simple.
+- Build tool: `tsdown`.
+- Git hooks: Husky with a pre-commit hook that runs format, lint, and tests.
+- Current codebase shape is small: one source entrypoint and one test file.
 
 ## Repository Layout
 
-- `src/index.ts`: main runtime entrypoint.
-- `src/*.ts`: source modules.
+- `src/index.ts`: main source entrypoint and current exported API.
 - `tests/*.test.ts`: Vitest test files.
-- `tsconfig.json`: TypeScript compiler behavior.
+- `package.json`: scripts, toolchain, lint-staged config, and package metadata.
+- `tsconfig.json`: compiler behavior.
 - `tsdown.config.ts`: build configuration.
-- `.oxfmtrc.json`: formatting and import sort rules.
+- `.oxfmtrc.json`: formatter and import sorting rules.
 - `.oxlintrc.json`: lint rules.
-- `.github/workflows/ci.yaml`: CI behavior.
+- `.husky/pre-commit`: local pre-commit checks.
+- `.github/workflows/ci.yaml`: CI workflow.
 - `dist/`: build output.
+- `coverage/`: test coverage output when generated.
 
 ## Core Commands
 
@@ -41,148 +43,110 @@
 - Run tests: `bun run test`
 - Run verbose tests: `bun run test:verbose`
 - Run tests with tree reporter: `bun run test:tree`
-- Generate changelog output: `bun run changelog`
-- Bump changelog version: `bun run changelog:bump`
-- Create changelog release notes: `bun run changelog:release`
+- Dry-run release notes: `bun run release:dry`
+- Create patch release notes: `bun run release:patch`
+- Create minor release notes: `bun run release:minor`
+- Create major release notes: `bun run release:major`
 
-## Test Commands
+## Build And CI Notes
 
-- Run all tests once: `bun run test`
-- Run a single test file: `bun run test -- tests/sum.test.ts`
-- Equivalent direct Vitest command: `bunx vitest run tests/sum.test.ts`
-- Run tests matching a name substring: `bun run test -- tests/sum.test.ts -t "adds"`
-- The `test` script already includes `--run`, so do not append another `--run` unless you intentionally bypass the script and call Vitest directly.
-
-## Build and CI Notes
-
-- The build command runs `bunx --bun tsdown`.
-- `tsdown.config.ts` builds from `./src/index.ts`.
-- The build emits declaration files and minified output.
-- `bun` is marked as external in the bundle.
-- Husky is installed through the `prepare` script.
-- The current `.husky/pre-commit` hook runs `bun run fmt`, `bun run lint`, and `bun run test`.
+- The build command is `bunx --bun tsdown`.
+- `tsdown.config.ts` currently builds from `./src/index.ts` with `minify: true`.
+- The start script runs `bun ./dist/index.mjs`.
 - CI currently runs `bun install`, `bun run lint`, and `bun run build`.
-- CI does not currently run `bun run test`.
-- If you change runtime behavior, run tests locally even though CI will not catch test regressions yet.
+- CI does not currently run tests.
+- The local pre-commit hook runs `bun run fmt`, `bun run lint`, and `bun run test`.
+- `lint-staged` runs `oxfmt` for `*.{js,ts,yaml,yml}` and `oxlint` for `*.{js,ts}`.
 
-## Formatting Rules
+## Formatting And Linting
 
-- Run `bun run fmt` after editing TypeScript or JSON-like files.
-- `bun run fmt` writes changes first and then runs a check; expect it to modify files.
-- Oxfmt is configured for single quotes.
-- Let Oxfmt own whitespace, commas, semicolons, and wrapping decisions.
+- Let `oxfmt` control whitespace, wrapping, semicolons, and quote style.
+- `oxfmt` is configured for single quotes.
 - Imports are sorted automatically.
-- Import order is `import type`, built-in/external values, internal values, parent/sibling/index values, then unknown imports.
-- `newlinesBetween` is disabled, so do not add blank lines between import groups just for style.
+- Import order is `import type`, built-in or external values, internal values, parent or sibling or index values, then unknown imports.
+- `newlinesBetween` is disabled, so do not add blank import-group separators just for style.
 - `sortPackageJson` is disabled, so do not reorder `package.json` fields unless there is a reason.
+- `CHANGELOG.md` is ignored by `oxfmt`.
+- `oxlint` is type-aware and strict; expect it to enforce complexity, naming, import, and safety rules.
 
 ## TypeScript Expectations
 
 - Assume strict TypeScript everywhere.
-- `noUncheckedIndexedAccess` is enabled, so indexed access often yields `T | undefined`.
+- `noUncheckedIndexedAccess` is enabled.
 - `noImplicitOverride` is enabled.
 - `moduleResolution` is `bundler` and `verbatimModuleSyntax` is enabled.
 - `noEmit` is enabled in TypeScript; builds come from `tsdown`, not `tsc`.
-- This is an ESM-only repo; do not introduce CommonJS patterns.
-- Avoid `require(...)`, `module.exports`, and similar legacy module code.
-- `allowImportingTsExtensions` is enabled, but the existing code uses extensionless relative imports.
-- Follow existing local import style unless a file already establishes a different pattern.
-- Prefer straightforward functions and modules over classes.
-- Avoid `namespace` and `const enum`.
-- Prefer unions, literal types, and simple objects over elaborate type machinery.
-- Avoid `any`, unsafe assertions, and non-null assertions when better narrowing is possible.
-- Prefer `readonly` data when it clarifies API intent.
-- Do not reassign function parameters.
+- `allowImportingTsExtensions` is enabled, but follow the existing local import style unless a file already establishes something else.
+- This is an ESM repo; do not introduce CommonJS patterns.
+- Avoid `require(...)`, `module.exports`, `namespace`, and `const enum`.
+- Prefer simple types, unions, and small helpers over elaborate type machinery.
+- Avoid `any`, unnecessary assertions, and non-null assertions when narrowing is possible.
 
-## Imports and Exports
+## Code Style
 
 - Prefer named exports for reusable source modules.
 - Use default exports only where the ecosystem expects them, such as config files.
 - Use `import type` for type-only imports.
-- Keep imports deduplicated and minimal.
-- Prefer relative imports inside the repository; no path alias is configured.
-- Avoid barrel files; the lint config forbids them.
-- Avoid side-effect-only imports unless they are truly required.
-- Avoid self-imports and circular dependency tricks.
+- Prefer relative imports inside the repo; no path alias is configured.
+- Avoid barrel files; lint rules forbid them.
 - If you import a Node builtin, prefer the `node:` protocol.
-
-## Naming and File Conventions
-
 - Use `camelCase` for variables and functions.
 - Use `PascalCase` for types, interfaces, and classes.
 - Use `UPPER_SNAKE_CASE` only for true constants.
-- Keep filenames simple and consistent with the current lowercase scaffold style.
-- Put entry code in `src/index.ts`.
-- Put general modules in `src/`.
-- Put tests in `tests/` with the `*.test.ts` suffix.
-- Prefer one main responsibility per file.
-
-## Lint-Driven Style Guidance
-
-- Prefer `const` over `let` whenever a value does not change.
-- Use `===` and `!==`.
-- Prefer template literals over string concatenation when interpolation is involved.
-- Prefer optional chaining and nullish coalescing over verbose guards.
-- Prefer object spread over `Object.assign` for plain object merges.
-- Prefer `find`, `some`, `flat`, and `flatMap` when they express intent clearly.
-- Avoid `forEach` and `reduce` when a loop or clearer helper is easier to read.
-- Prefer `for...of` for straightforward iteration.
+- Keep filenames simple and consistent with the existing lowercase style.
+- Prefer `const` over `let` whenever possible.
+- Prefer `for...of` over `forEach` when a loop is clearer.
+- Avoid `reduce` when a loop or clearer helper communicates intent better.
 - Avoid in-place `sort()` and `reverse()` on shared arrays unless you copy first.
-- Keep control flow shallow; the lint config is strict about nesting and complexity.
-- Use exhaustive `switch` handling for discriminated unions.
-- Avoid shadowing, duplicate imports, and empty object/function placeholders.
-- Prefer `// @ts-expect-error` over `// @ts-ignore` only when suppression is unavoidable.
-
-## Async and Error Handling
-
-- Prefer `async`/`await` over `.then()` chains.
-- Avoid mixing promises and callback-style APIs.
-- Avoid `await` inside loops unless sequential behavior is required.
-- Return consistent types from all branches.
-- Throw `Error` instances, not strings or plain objects.
-- Include a useful message when throwing.
-- Preserve the original error or cause when wrapping failures.
-- In `catch` blocks, treat the error as `unknown` and narrow before reading from it.
-- Do not silently swallow failures.
-- Do not use `process.exit()` from library code.
-
-## Logging and Comments
-
-- `no-console` is enabled.
-- If a CLI entrypoint genuinely needs console output, keep the exception narrow and explicit.
-- `src/index.ts` currently demonstrates this with `/* oxlint-disable no-console */`.
-- Do not leave debug logging in library code or tests.
-- Keep comments rare and useful.
-- Avoid inline `//` comments in TS/JS; `no-inline-comments` is enabled.
-- If a comment is needed, prefer a short block comment above the code it explains.
+- Keep control flow shallow and readable.
+- Throw `Error` instances with useful messages.
+- Treat caught errors as `unknown` until narrowed.
+- Do not leave debug logging in committed code.
+- Keep comments rare, short, and useful.
 
 ## Testing Guidance
 
-- Use Vitest for unit tests.
+- Use Vitest for tests.
 - Import test APIs from `vitest`.
 - Prefer small, deterministic, behavior-focused tests.
-- Use clear test names that describe behavior, not implementation.
-- Current tests import source via relative paths such as `../src/sum`.
-- For a new module like `src/foo.ts`, add a corresponding `tests/foo.test.ts` when behavior changes.
-- There is no custom Vitest setup file in this scaffold.
-- For quick feedback, run only the affected test file first.
-- Before finishing a behavior change, run at least targeted tests and `bun run lint`.
-
-## Agent Workflow
-
-- Read the touched file and nearby tests before editing.
-- Prefer the smallest correct change.
-- Do not add dependencies unless the task genuinely requires them.
-- Do not introduce abstraction layers in a tiny file without immediate payoff.
+- Use clear test names that describe behavior.
+- Put tests in `tests/` with the `*.test.ts` suffix.
+- The current tests import from `../src`, so preserve that style unless the repo changes.
 - When behavior changes, add or update tests.
-- After meaningful changes, run the smallest validating command set that covers the edit.
-- Good default validation for a local logic change: `bun run lint` and a targeted Vitest command.
-- Good default validation for broad changes: `bun run lint`, `bun run test`, and `bun run build`.
-- If you skip a relevant validation command, state why.
+- For quick feedback, run the smallest relevant test command first.
+
+## What To Avoid
+
+- Do not add a new formatter or linter unless the task explicitly requires it.
+- Do not move tests into new directories without updating the test config includes.
+- Do not commit generated coverage artifacts.
+- Do not bypass `bun`; repository scripts and dependency metadata assume it.
+- Do not introduce inconsistent naming or switch between type styles arbitrarily inside the same file.
+
+## Editing Guidance
+
+- Make the smallest correct change.
+- Do not polish unrelated code.
+- Do not remove correct comments or documentation.
+- Do not rename broad parts of the codebase unless required.
+- Do not expand a change into a repo-wide refactor unless necessary.
+- Prefer leaving correct existing code in place.
+- When touching production-sensitive code, prioritize reliability over clever abstractions.
+- Read the touched file and nearby tests before editing.
+- Do not add dependencies unless the task genuinely requires them.
+- Do not introduce abstraction layers without immediate payoff.
+
+## Before Finishing
+
+- Run `bun run fmt` if you changed formatting significantly.
+- Run `bun run lint` or at least targeted `oxlint` on touched files.
+- Run targeted tests when tests exist.
+- For runtime-sensitive changes, prefer a narrow smoke check over broad refactors.
+- If you changed build or runtime behavior, ensure `bun run build` still works.
+- If you skip a relevant validation step, say why.
 
 ## Current Reality
 
-- This repo is currently a scaffold, not a large mature application.
-- Most style conventions come from the formatter, linter, and compiler config more than from a large code corpus.
-- Prefer the established minimal scaffold style over framework-heavy patterns.
-- Keep this file synchronized with future Cursor or Copilot rule files if they are added.
+- This repo is still a small Bun + TypeScript package, not a large application.
+- Prefer direct, simple code over framework-heavy patterns or premature abstraction.
+- Keep this file synchronized with the actual repo setup as scripts, tooling, and structure evolve.
