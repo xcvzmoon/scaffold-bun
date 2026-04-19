@@ -1,5 +1,5 @@
-# Scaffold Bun
+# Kickstart Bun
 
 ```sh
-bunx giget gh:xcvzmoon/scaffold-bun my-app --install
+bunx giget gh:xcvzmoon/kickstart-bun my-bun-app --install
 ```
