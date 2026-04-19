@@ -34,6 +34,9 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Format Files
+        run: bun run fmt
+
       - name: Lint Files
         run: bun run lint
 
